@@ -1,0 +1,73 @@
+
+body {
+    font-family: sans-serif;
+    /*background-color: #efeff5;*/
+}
+h1, h2, h3, h4, h5, h6 {
+    color: #4C4D53;
+}
+
+.table_index {
+	font-weight: bold;
+	padding-right: 1em; 
+}
+
+.table_value, .table_index{
+	padding-bottom: 1em; 
+}
+
+.app-header--title {
+	color: black;
+	text-decoration: underline;
+	margin-bottom: 0;
+}
+.app-header--author {
+	font-size: 15px;
+}
+
+#divBody{
+	padding-left:3em;
+	padding-right:3em;
+
+}
+
+#divCompanyInfo{
+	width: 60em;
+	margin-bottom: 3em;
+}
+
+#my-graph{
+	width: 60em;
+}
+
+#drpdwnPeriodRange, #drpdwnCompany {
+	width: 30em;
+	margin-bottom: 1em;
+}
+
+.selectors {
+	display: table-row
+}
+
+.selectors {
+	display: table-cell;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.tableNews_valueRows:hover {background-color:#f5f5f5;}
+
+td {
+    width: 100px;
+    white-space: nowrap;
+}
+}
