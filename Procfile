@@ -1,1 +1,1 @@
-web: python mdMain.py
+web: gunicorn app:server
