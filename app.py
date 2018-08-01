@@ -1,4 +1,6 @@
 
+#GET DATA FROM IEX TRADING API
+#ACCESSED BY BOTH THE GETCOMANYINFO(), GETSTOCKCHART() AND GETAVAILABLESTOCKS() FUNCTIONS
 def getData(dictParametersData):
     import requests
 
@@ -22,6 +24,8 @@ def getData(dictParametersData):
     r = requests.get(strBranch)
     return r
 
+#INPUT: COMPANY TICKER, OUTPUT: JSON FILE CONTAINING COMPANY STATIC DATA PULLED FROM IEX API
+#ACCESSED BY SDFCOPMANYINFO() FUNCTION
 def getCompanyInfo(strCompanyTicker):
     strEndpoint = 'stock'
     strType = 'company'
@@ -30,6 +34,8 @@ def getCompanyInfo(strCompanyTicker):
 
     return jsonCompanyData
 
+#INPUT: COMPANY TICKER, OUTPUT: PANDAS DATAFRAME CONTAINING COMPANY STATIC DATA PULLED FROM IEX API
+#PULLS JSON FROM FUNCTION GETCOMPANYINFO() AND CONVERTS JSON TO DATAFRAME
 def sDFCompanyInfo(strCompanyTicker):
     import pandas as pd
     import dash_html_components as html
@@ -43,6 +49,8 @@ def sDFCompanyInfo(strCompanyTicker):
 
     return dfCompanyInfo
 
+#INPUT: COMPANY TICKER, OUTPUT: PANDAS DATAFRAME CONTAINING SECURITY PRICE DATA PULLED FROM IEX API
+#USES FUNCTION GETCOMPANYINFO() TO PULL STOCK PRICE INFO FROM IEX API
 def getStockChart(dictParametersStockChart):
     import pandas as pd
 
@@ -57,6 +65,7 @@ def getStockChart(dictParametersStockChart):
 
     return dfChrtData
 
+#INPUT: NONE, OUTPUT: PANDAS DATAFRAME CONTAINING ALL STOCKS WHICH HAVE PRICES PROVIDED BY THE IEX API
 def getAvailableStocks():
     strBranch = '/ref-data/symbols'
     dictParametersData = {'strEndpoint':strBranch}
@@ -69,6 +78,7 @@ def getAvailableStocks():
 
     return availableStocks
 
+
 def getStockDropdownData(dictRawData, dictParameterLookup):
     dropdownData = []
     labelPosition = dictParameterLookup['label']
@@ -80,6 +90,7 @@ def getStockDropdownData(dictRawData, dictParameterLookup):
         dropdownData.append({'label':label , 'value':value})
     return dropdownData
 
+#INPUT: NONE, OUTPUT: LIST CONTAINING AVAILABLE TIME PERIODS FOR IEX API LOOKUP
 def getPeriodRangeDropdownData():
     lstPeriods = ['1d','1m','3m','6m','ytd', '1y','2y','5y']
     dropdownData = []
@@ -89,17 +100,18 @@ def getPeriodRangeDropdownData():
         dropdownData.append({'label':label , 'value':value})
     return dropdownData
 
+#INPUT: DATAFRAME, OUTPUT: DASH_HTML COMPONENT
+#CONVERTS A DATAFRAME INTO A DASH_HTML COMPONENT WHICH CAN BE DISPLAYED BY THE WEBAPP
 def generate_table(dataframe, tableid = '', max_rows=10):
     import dash_html_components as html
     return html.Table(
-
-
-
         [html.Tr([html.Td(dataframe.index[i].title(),className='table_index')] + [
             html.Td(dataframe.iloc[i][col],className='table_value') for col in dataframe.columns
         ], id='') for i in range(min(len(dataframe), max_rows))]
     )
 
+#INPUT: DATAFRAME, OUTPUT: DASH_HTML COMPONENT
+#CONVERTS A DATAFRAME INTO A DASH_HTML COMPONENT WHICH CAN BE DISPLAYED BY THE WEBAPP
 def generate_table_News(dataframe, tableid = '', max_rows=10):
     import dash_html_components as html
     return html.Table(
@@ -112,12 +124,15 @@ def generate_table_News(dataframe, tableid = '', max_rows=10):
         ],className='tableNews_valueRows') for i in range(min(len(dataframe), max_rows))], className='tableNews'
     )
 
+#INPUT: DATAFRAME, OUTPUT: DATAFRAME
 def getStockStats(dftockPrices):
     dfStats = dftockPrices.describe()
     # print(dfStats)
     return dfStats
 
-
+#ACCESSES THE NYT API AND OBTAINS LIST OF RELEVANT NEWS GIVEN A TIME PERIOD, A SECURITY TICKER
+#INPUT: DICTIONARY OF SEARCH TERMS (TICKER, BEGINDATE, ENDDATE, SORTMETHOD), AND A LIST OF COLUMNS TO BE RETURNED
+#OUTPUT: PANDAS DATAFRAME WITH RELEVANT NEWS
 def GetNYTNews(dictSearchTerms, lstReturnCols):
     import requests
     import pandas as pd
@@ -149,7 +164,6 @@ def GetNYTNews(dictSearchTerms, lstReturnCols):
         except:
             break
 
-
     dfNYT['headline'] = dfNYT.apply(lambda row: row['headline']['main'], axis=1)
     dfNYT['pub_date'] = dfNYT.apply(lambda row: row['pub_date'][0:10], axis=1)
     dfNYT = dfNYT.sort_values(by='pub_date', ascending=False)
@@ -158,17 +172,11 @@ def GetNYTNews(dictSearchTerms, lstReturnCols):
     return dfNYT
 
 
+#MAIN PROGRAM
 import dash
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
-from pandas_datareader import data as web
-from datetime import datetime as dt
-import flask
-import os
-
-# import mdNYT as NYT
-
 
 app = dash.Dash(__name__)
 server = app.server
@@ -212,13 +220,8 @@ app.layout = html.Div([
 ],id='divBody')
 
 
-
-#SET UP THE ICON SHOWN IN THE WEBBROWSER TAB
-# @server.route('/favicon.ico')
-# def favicon():
-#     return flask.send_from_directory(os.path.join(server.root_path, 'static'),
-#                                      'favicon.ico')
-
+import pandas as pd
+dfStockData = pd.DataFrame()
 
 #UPDATE CHARR WHENEVER A NEW COMPANY OR A NEW PERIOD RANGE IS CHOSEN
 @app.callback(Output('my-graph', 'figure'), [Input('drpdwnCompany', 'value'), Input('drpdwnPeriodRange', 'value')])
@@ -241,21 +244,19 @@ def update_table(stock_dropdown_value):
     dfCompanyInfo = sDFCompanyInfo(stock_dropdown_value)
     return generate_table(dfCompanyInfo, 'tblCompanyInfo', dfCompanyInfo.shape[0])
 
+#UPDATE THE PRICE STATISTICS TABLE WHENEVER A NEW COMPANY IS CHOSEN, OR A NEW PERIOD IS CHOSEN
 @app.callback(Output('divPriceStats', 'children'), [Input('drpdwnCompany', 'value'), Input('drpdwnPeriodRange', 'value')])
 def update_table(stock_dropdown_value, period_dropdown_value):
     dfStockData = getStockChart({'strStock': stock_dropdown_value, 'strPeriod': period_dropdown_value})
     dfStockStats = getStockStats(dfStockData.loc[:,['close']])
     return generate_table(dfStockStats, 'tblCompanyInfo', dfStockStats.shape[0])
 
+#UPDATE NYT NEWS FEED WHENEVER NEW COMPANY IS CHOSEN
 @app.callback(Output('divCompanyNews', 'children'), [Input('drpdwnCompany', 'value')])
 def update_tableNews(stock_dropdown_value):
 
     strCompanyName = sDFCompanyInfo(stock_dropdown_value).transpose()['companyName'][0]
     strCompanyTicker = sDFCompanyInfo(stock_dropdown_value).transpose()['symbol'][0]
-
-    print(strCompanyName)
-    print(strCompanyTicker)
-
 
     strSearchTerm = '&q='+ strCompanyName
     stBegindate = '&begin_date=20170101'
@@ -271,6 +272,6 @@ def update_tableNews(stock_dropdown_value):
 
 
 
-
+#STARTS THE SERVER AND INITIALIZES THE PROGRAM
 if __name__ == '__main__':
     app.run_server(debug=True)
