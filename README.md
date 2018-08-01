@@ -8,9 +8,10 @@ QUESTION I WANT TO ANSWER:
 Is there any news which is driving the price of a security up or down?
 
 METHOD APPLIED TO ANSWER QUESTION:
-  a) Program obtains a list of relevant securities is obtained from IEX API
-  b) User selects a security is selected from the Security drop-down, and a time period from the Time Period drop-down
-  c) With the security name and time period selected,
+
+	a) Program obtains a list of relevant securities is obtained from IEX API
+	b) User selects a security is selected from the Security drop-down, and a time period from the Time Period drop-down
+	c) With the security name and time period selected,
       - program obtains from IEX API:
           - security prices throughout the period
           - company details, including:
@@ -28,7 +29,7 @@ METHOD APPLIED TO ANSWER QUESTION:
             - min
             - stdev.
   
-  d) Finally, weith the company ticker obtained above, the program searches the NYT API for any relevant news throughout the period.
+	d) Finally, weith the company ticker obtained above, the program searches the NYT API for any relevant news throughout the period.
   
   
 APIs USED:
