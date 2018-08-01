@@ -214,10 +214,10 @@ app.layout = html.Div([
 
 
 #SET UP THE ICON SHOWN IN THE WEBBROWSER TAB
-@server.route('/favicon.ico')
-def favicon():
-    return flask.send_from_directory(os.path.join(server.root_path, 'static'),
-                                     'favicon.ico')
+# @server.route('/favicon.ico')
+# def favicon():
+#     return flask.send_from_directory(os.path.join(server.root_path, 'static'),
+#                                      'favicon.ico')
 
 
 #UPDATE CHARR WHENEVER A NEW COMPANY OR A NEW PERIOD RANGE IS CHOSEN
@@ -273,4 +273,4 @@ def update_tableNews(stock_dropdown_value):
 
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(debug=True)
